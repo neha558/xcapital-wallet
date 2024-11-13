@@ -1,0 +1,73 @@
+doctype html
+html
+  head
+    title Wallet Transactions
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css')
+    script(src='https://cdn.jsdelivr.net/npm/web3@1.5.3/dist/web3.min.js')
+    script.
+      // Initialize web3 with provider (like MetaMask)
+      if (typeof web3 !== 'undefined') {
+        web3 = new Web3(web3.currentProvider);
+      } else {
+        // Handle the case where web3 is not present, such as when MetaMask is not installed
+        console.log('No web3? You should consider trying MetaMask!')
+        // Fallback to a local provider
+        web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+      }
+      
+      // Define your contract ABI and address
+      var contractABI = [
+        // Define your contract's ABI here
+      ];
+      var contractAddress = '0x247172df7322ef1c6f121ec88610efe873ed64ae';
+
+      // Instantiate the contract
+      var contract = new web3.eth.Contract(contractABI, contractAddress);
+
+      // Function to call the distribute method on the contract
+      function distribute(walletAddress, id) {
+        // Example parameters, replace with actual parameters
+        var options = {
+          from: 'YOUR_WALLET_ADDRESS', // Specify the sender address
+          gasPrice: '10000000000', // Example gas price
+          gas: '200000', // Example gas limit
+        };
+
+        // Call the contract's distribute function
+        contract.methods.distribute(walletAddress, id).send(options)
+          .on('transactionHash', function(hash){
+            console.log('Transaction hash:', hash);
+            // Handle transaction hash
+          })
+          .on('confirmation', function(confirmationNumber, receipt){
+            console.log('Confirmation:', confirmationNumber, receipt);
+            // Handle confirmation
+          })
+          .on('error', function(error, receipt) {
+            console.error('Error:', error, receipt);
+            // Handle error
+          });
+      }
+  body
+    div.container
+      h2 Wallet Transactions
+      table.table.table-striped
+        thead
+          tr
+            th Wallet Address
+            th Transaction
+            th Status
+            th Pack
+            th Amount
+            th Action
+        tbody
+          //- Example table data, replace with your dynamic data
+          each transaction in data
+            tr
+              td #{transaction.walletAddress}
+              td #{transaction.tx}
+              td #{transaction.status}
+              td #{transaction.pack}
+              td #{transaction.amount}
+              td 
+                button.btn.btn-primary(type='button', onclick='distribute(#{transaction.walletAddress}, #{transaction.id})') Distribute
